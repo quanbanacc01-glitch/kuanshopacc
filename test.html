@@ -1,0 +1,87 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Shop Acc Game</title>
+
+    <style>
+      body {
+        font-family: Arial;
+        background: #f4f4f4;
+      }
+
+      .products {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+        gap: 20px;
+      }
+
+      .product {
+        background: white;
+        padding: 15px;
+        border-radius: 10px;
+        text-align: center;
+      }
+
+      .product img {
+        width: 100%;
+      }
+    </style>
+  </head>
+
+  <body>
+    <h1>SHOP ACC GAME</h1>
+
+    <div id="products" class="products"></div>
+
+    <script>
+      async function loadAcc() {
+        let token = "8257254524:AAGwFDotvQfd3kxdgrpdTvSqS7gHlK5dBbo";
+
+        let res = await fetch(
+          `https://api.telegram.org/bot${token}/getUpdates`,
+        );
+        let data = await res.json();
+
+        let list = document.getElementById("products");
+
+        for (let m of data.result) {
+          if (m.channel_post && m.channel_post.photo) {
+            let photo = m.channel_post.photo;
+            let fileId = photo[photo.length - 1].file_id;
+
+            // lấy file_path
+            let fileRes = await fetch(
+              `https://api.telegram.org/bot${token}/getFile?file_id=${fileId}`,
+            );
+            let fileData = await fileRes.json();
+
+            let filePath = fileData.result.file_path;
+
+            let img = `https://api.telegram.org/file/bot${token}/${filePath}`;
+
+            let text = m.channel_post.caption || "Acc Game";
+
+            list.innerHTML += `
+<div class="product">
+
+<img src="${img}">
+
+<h3>${text}</h3>
+
+<button onclick="buy()">Mua</button>
+
+</div>
+`;
+          }
+        }
+      }
+
+      function buy() {
+        window.open("https://zalo.me/0869697154");
+      }
+
+      loadAcc();
+    </script>
+  </body>
+</html>
