@@ -98,7 +98,6 @@
         margin: 0 auto 25px;
       }
 
-      /* Khung tìm kiếm và gợi ý */
       .search-box {
         max-width: 500px;
         margin: 0 auto;
@@ -120,41 +119,6 @@
       .search-box input:focus {
         border-color: var(--primary);
         box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
-      }
-
-      /* Danh sách gợi ý lệnh */
-      .suggestions-list {
-        position: absolute;
-        top: 100%;
-        left: 0;
-        right: 0;
-        background: var(--card-bg);
-        border: 1px solid var(--card-border);
-        border-radius: 10px;
-        margin-top: 6px;
-        overflow: hidden;
-        display: none;
-        z-index: 50;
-        box-shadow: 0 10px 25px rgba(0,0,0,0.5);
-      }
-
-      .suggestion-item {
-        padding: 12px 20px;
-        text-align: left;
-        cursor: pointer;
-        font-size: 14px;
-        color: var(--text-main);
-        border-bottom: 1px solid var(--card-border);
-        transition: background 0.2s;
-      }
-
-      .suggestion-item:last-child {
-        border-bottom: none;
-      }
-
-      .suggestion-item:hover {
-        background: rgba(59, 130, 246, 0.2);
-        color: #60a5fa;
       }
 
       main {
@@ -355,8 +319,7 @@
       <h1>KHO TÀI KHOẢN GAME GIÁ RẺ</h1>
       <p>Giao dịch trực tiếp qua Zalo • Uy tín 100% • Bấm vào ảnh để xem chi tiết thông tin tài khoản</p>
       <div class="search-box">
-        <input type="text" id="searchInput" placeholder="🔍 Tìm kiếm mã số, giá tiền hoặc gõ #..." oninput="handleSearchInput()" autocomplete="off" />
-        <div id="suggestions" class="suggestions-list"></div>
+        <input type="text" id="searchInput" placeholder="🔍 Tìm kiếm mã số hoặc giá tiền..." oninput="filterProducts()" autocomplete="off" />
       </div>
     </section>
 
@@ -381,14 +344,14 @@
       const TOKEN = "8257254524:AAGwFDotvQfd3kxdgrpdTvSqS7gHlK5dBbo";
       const ZALO_PHONE = "0869697154";
       let allAccounts = [];
-      const adminCommands = ["#xoatatca"];
 
       async function loadAcc() {
         const statusEl = document.getElementById("status");
         const listEl = document.getElementById("products");
 
         try {
-          const res = await fetch(`https://api.telegram.org/bot${TOKEN}/getUpdates`);
+          // Thêm tham số tránh lưu cache cũ
+          const res = await fetch(`https://api.telegram.org/bot${TOKEN}/getUpdates?_t=` + new Date().getTime());
           const data = await res.json();
 
           if (!data.ok || !data.result || data.result.length === 0) {
@@ -396,6 +359,24 @@
             return;
           }
 
+          // 1. Quét tất cả các lệnh #xoa từ tin nhắn text trên kênh
+          let deletedCodes = new Set();
+          data.result.forEach(m => {
+            let msg = m.channel_post || m.message;
+            if (msg && msg.text) {
+              let text = msg.text.trim().toLowerCase();
+              if (text.startsWith("#xoa")) {
+                let parts = text.split(/\s+/);
+                if (parts.length > 1) {
+                  let targetCode = parts[1];
+                  if (!targetCode.startsWith("#")) targetCode = "#" + targetCode;
+                  deletedCodes.add(targetCode);
+                }
+              }
+            }
+          });
+
+          // 2. Lọc các bài đăng chứa ảnh hợp lệ
           const posts = data.result
             .map(m => m.channel_post || m.message)
             .filter(post => post && post.photo)
@@ -428,6 +409,11 @@
               }
             } else if (rawCaption.trim() !== "") {
               accCode = rawCaption.trim().startsWith("#") ? rawCaption.trim() : "#" + rawCaption.trim();
+            }
+
+            // Nếu mã acc này đã nằm trong danh sách bị lệnh #xoa gọi tên thì bỏ qua không hiển thị
+            if (deletedCodes.has(accCode.toLowerCase())) {
+              return null;
             }
 
             return {
@@ -476,50 +462,8 @@
         `).join("");
       }
 
-      function handleSearchInput() {
-        const inputVal = document.getElementById("searchInput").value.trim();
-        const suggestionsBox = document.getElementById("suggestions");
-        
-        // Hiển thị gợi ý nếu người dùng gõ bắt đầu bằng dấu #
-        if (inputVal.startsWith("#")) {
-          const matchedCmds = adminCommands.filter(cmd => cmd.startsWith(inputVal.toLowerCase()));
-          if (matchedCmds.length > 0) {
-            suggestionsBox.innerHTML = matchedCmds.map(cmd => `
-              <div class="suggestion-item" onclick="selectSuggestion('${cmd}')">⚙️ Lệnh hệ thống: <b>${cmd}</b></div>
-            `).join("");
-            suggestionsBox.style.display = "block";
-          } else {
-            suggestionsBox.style.display = "none";
-          }
-        } else {
-          suggestionsBox.style.display = "none";
-        }
-
-        filterProducts();
-      }
-
-      function selectSuggestion(cmd) {
-        document.getElementById("searchInput").value = cmd;
-        document.getElementById("suggestions").style.display = "none";
-        filterProducts();
-      }
-
-      // Đợi click ra ngoài thì ẩn bảng gợi ý
-      document.addEventListener("click", (e) => {
-        if (!e.target.closest(".search-box")) {
-          document.getElementById("suggestions").style.display = "none";
-        }
-      });
-
       function filterProducts() {
         const keyword = document.getElementById("searchInput").value.toLowerCase().trim();
-        const listEl = document.getElementById("products");
-
-        if (keyword === "#xoatatca") {
-          listEl.innerHTML = "<p style='grid-column: 1/-1; text-align:center; color:#f43f5e; font-weight:700; font-size: 18px; padding: 20px;'>🗑️ Đã ẩn toàn bộ danh sách tài khoản theo lệnh quản trị (#xoatatca)!</p>";
-          return;
-        }
-
         const filtered = allAccounts.filter(acc => 
           acc.rawText.includes(keyword) || acc.code.toLowerCase().includes(keyword)
         );
