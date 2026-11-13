@@ -3,181 +3,474 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Shop Acc Game</title>
+    <title>SHOP ACC GAME UY TÍN - TỰ ĐỘNG 24/7</title>
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;600;700;800&display=swap" rel="stylesheet">
 
     <style>
-      body {
-        font-family: Arial, sans-serif;
-        background: #f4f4f4;
-        margin: 0;
-        padding: 20px;
+      :root {
+        --bg-dark: #0b0f19;
+        --card-bg: #151c2c;
+        --card-border: #232d42;
+        --primary: #3b82f6;
+        --accent: #f43f5e;
+        --text-main: #f8fafc;
+        --text-muted: #94a3b8;
       }
 
-      h1 {
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        font-family: 'Be Vietnam Pro', sans-serif;
+        background-color: var(--bg-dark);
+        color: var(--text-main);
+        line-height: 1.5;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+      }
+
+      /* Header / Navbar */
+      header {
+        background: rgba(21, 28, 44, 0.85);
+        backdrop-filter: blur(12px);
+        border-bottom: 1px solid var(--card-border);
+        padding: 16px 24px;
+        position: sticky;
+        top: 0;
+        z-index: 100;
+      }
+
+      .nav-container {
+        max-width: 1280px;
+        margin: 0 auto;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 15px;
+      }
+
+      .logo {
+        font-size: 22px;
+        font-weight: 800;
+        background: linear-gradient(90deg, #60a5fa, #f43f5e);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        letter-spacing: 0.5px;
+      }
+
+      .contact-badge {
+        background: rgba(59, 130, 246, 0.15);
+        color: #60a5fa;
+        border: 1px solid rgba(59, 130, 246, 0.3);
+        padding: 6px 14px;
+        border-radius: 20px;
+        font-size: 13px;
+        font-weight: 600;
+        text-decoration: none;
+        transition: 0.2s;
+      }
+
+      .contact-badge:hover {
+        background: var(--primary);
+        color: white;
+      }
+
+      /* Hero Banner & Search */
+      .hero {
         text-align: center;
-        color: #333;
+        padding: 45px 20px 30px;
+        background: radial-gradient(circle at top, #1e293b 0%, var(--bg-dark) 70%);
+      }
+
+      .hero h1 {
+        font-size: 32px;
+        font-weight: 800;
+        margin-bottom: 10px;
+      }
+
+      .hero p {
+        color: var(--text-muted);
+        font-size: 15px;
+        max-width: 600px;
+        margin: 0 auto 25px;
+      }
+
+      .search-box {
+        max-width: 500px;
+        margin: 0 auto;
+        position: relative;
+      }
+
+      .search-box input {
+        width: 100%;
+        padding: 14px 20px;
+        border-radius: 12px;
+        border: 1px solid var(--card-border);
+        background: var(--card-bg);
+        color: white;
+        font-size: 15px;
+        outline: none;
+        transition: border-color 0.2s, box-shadow 0.2s;
+      }
+
+      .search-box input:focus {
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+      }
+
+      /* Main Grid */
+      main {
+        flex: 1;
+        max-width: 1280px;
+        width: 100%;
+        margin: 0 auto;
+        padding: 20px 24px 60px;
       }
 
       .products {
         display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-        gap: 20px;
-        max-width: 1200px;
-        margin: 0 auto;
+        grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+        gap: 24px;
       }
 
       .product {
-        background: white;
-        padding: 15px;
-        border-radius: 10px;
-        text-align: center;
-        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        background: var(--card-bg);
+        border: 1px solid var(--card-border);
+        border-radius: 14px;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
       }
 
-      .product img {
+      .product:hover {
+        transform: translateY(-6px);
+        border-color: var(--primary);
+        box-shadow: 0 12px 24px rgba(0, 0, 0, 0.4);
+      }
+
+      .img-wrapper {
+        position: relative;
         width: 100%;
-        height: 180px;
-        object-fit: cover;
-        border-radius: 6px;
-        cursor: pointer;
-        transition: transform 0.2s;
+        height: 190px;
+        overflow: hidden;
+        background: #0f172a;
+        cursor: zoom-in;
       }
 
-      .product img:hover {
-        transform: scale(1.03);
+      .img-wrapper img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.35s ease;
+      }
+
+      .product:hover .img-wrapper img {
+        transform: scale(1.06);
+      }
+
+      .zoom-hint {
+        position: absolute;
+        bottom: 8px;
+        right: 8px;
+        background: rgba(0, 0, 0, 0.7);
+        color: #fff;
+        font-size: 11px;
+        padding: 4px 8px;
+        border-radius: 6px;
+        pointer-events: none;
+      }
+
+      .card-body {
+        padding: 18px;
+        display: flex;
+        flex-direction: column;
+        flex: 1;
+      }
+
+      .acc-code {
+        font-size: 12px;
+        color: var(--primary);
+        font-weight: 700;
+        text-transform: uppercase;
+        margin-bottom: 6px;
       }
 
       .product h3 {
         font-size: 16px;
-        color: #444;
-        margin: 10px 0;
-        min-height: 40px;
+        font-weight: 600;
+        color: var(--text-main);
+        margin-bottom: 14px;
+        flex: 1;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
       }
 
-      .product button {
-        background: #ff4757;
+      .card-footer {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        padding-top: 14px;
+        border-top: 1px solid var(--card-border);
+      }
+
+      .price-tag {
+        font-size: 17px;
+        font-weight: 800;
+        color: #fbbf24;
+      }
+
+      .buy-btn {
+        background: linear-gradient(135deg, #f43f5e, #e11d48);
         color: white;
         border: none;
-        padding: 10px 20px;
-        border-radius: 5px;
+        padding: 10px 18px;
+        border-radius: 8px;
+        font-weight: 700;
+        font-size: 14px;
         cursor: pointer;
-        font-weight: bold;
-        width: 100%;
-        transition: background 0.2s;
+        transition: opacity 0.2s, transform 0.1s;
       }
 
-      .product button:hover {
-        background: #ff6b81;
+      .buy-btn:hover {
+        opacity: 0.9;
       }
 
-      .loading {
+      .buy-btn:active {
+        transform: scale(0.96);
+      }
+
+      /* Loading Spinner */
+      .status-box {
         text-align: center;
-        font-size: 18px;
-        color: #666;
-        margin-top: 20px;
+        padding: 50px 20px;
+        color: var(--text-muted);
       }
 
+      .spinner {
+        width: 40px;
+        height: 40px;
+        border: 4px solid rgba(59, 130, 246, 0.2);
+        border-top-color: var(--primary);
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+        margin: 0 auto 15px;
+      }
+
+      @keyframes spin {
+        to { transform: rotate(360deg); }
+      }
+
+      /* Lightbox Popup */
       .popup {
         display: none;
         position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(0, 0, 0, 0.8);
+        inset: 0;
+        background: rgba(5, 8, 15, 0.92);
+        backdrop-filter: blur(6px);
         justify-content: center;
         align-items: center;
         z-index: 1000;
+        padding: 20px;
       }
 
       .popup img {
-        max-width: 90%;
-        max-height: 90%;
-        border-radius: 5px;
+        max-width: 95%;
+        max-height: 90vh;
+        border-radius: 10px;
+        box-shadow: 0 0 30px rgba(0,0,0,0.8);
       }
 
       .popup span {
         position: absolute;
         top: 20px;
-        right: 40px;
-        font-size: 40px;
+        right: 30px;
+        font-size: 36px;
         color: white;
         cursor: pointer;
+        background: rgba(255,255,255,0.1);
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: 0.2s;
+      }
+
+      .popup span:hover {
+        background: var(--accent);
+      }
+
+      /* Footer */
+      footer {
+        text-align: center;
+        padding: 24px;
+        border-top: 1px solid var(--card-border);
+        color: var(--text-muted);
+        font-size: 13px;
+        background: var(--card-bg);
       }
     </style>
   </head>
 
   <body>
-    <h1>SHOP ACC GAME</h1>
+    <header>
+      <div class="nav-container">
+        <div class="logo">🎮 GAME STORE VN</div>
+        <a href="https://zalo.me/0869697154" target="_blank" class="contact-badge">
+          💬 Hỗ trợ Zalo: 0869.697.154
+        </a>
+      </div>
+    </header>
 
-    <div id="loading" class="loading">Đang tải danh sách tài khoản từ Telegram...</div>
-    <div id="products" class="products"></div>
+    <section class="hero">
+      <h1>KHO TÀI KHOẢN GAME GIÁ RẺ</h1>
+      <p>Giao dịch trực tiếp qua Zalo • Uy tín 100% • Bấm vào ảnh để xem chi tiết thông tin tài khoản</p>
+      <div class="search-box">
+        <input type="text" id="searchInput" placeholder="🔍 Tìm kiếm tên acc, tướng, skin, mức giá..." onkeyup="filterProducts()" />
+      </div>
+    </section>
+
+    <main>
+      <div id="status" class="status-box">
+        <div class="spinner"></div>
+        <p>Đang đồng bộ danh sách tài khoản mới nhất...</p>
+      </div>
+      <div id="products" class="products"></div>
+    </main>
+
+    <footer>
+      © 2026 Shop Acc Game • Hệ thống cập nhật tự động từ kênh Telegram
+    </footer>
 
     <div id="popup" class="popup" onclick="closeImg()">
       <span>&times;</span>
-      <img id="popup-img" />
+      <img id="popup-img" onclick="event.stopPropagation()" />
     </div>
 
     <script>
+      const TOKEN = "8257254524:AAGwFDotvQfd3kxdgrpdTvSqS7gHlK5dBbo";
+      const ZALO_PHONE = "0869697154";
+      let allAccounts = [];
+
       async function loadAcc() {
-        let token = "8257254524:AAGwFDotvQfd3kxdgrpdTvSqS7gHlK5dBbo";
-        let list = document.getElementById("products");
-        let loadingEl = document.getElementById("loading");
+        const statusEl = document.getElementById("status");
+        const listEl = document.getElementById("products");
 
         try {
-          let res = await fetch(`https://api.telegram.org/bot${token}/getUpdates`);
-          let data = await res.json();
-
-          loadingEl.style.display = "none";
+          const res = await fetch(`https://api.telegram.org/bot${TOKEN}/getUpdates`);
+          const data = await res.json();
 
           if (!data.ok || !data.result || data.result.length === 0) {
-            list.innerHTML = "<p style='text-align:center; width:100%'>Chưa có bài đăng nào trên kênh hoặc Bot chưa được thêm làm Admin của kênh.</p>";
+            statusEl.innerHTML = "<p>Hiện tại kho đang trống hoặc chưa có bài đăng mới.</p>";
             return;
           }
 
-          let htmlContent = "";
+          // Lọc các bài đăng có ảnh và đảo ngược để bài mới nhất lên đầu
+          const posts = data.result
+            .map(m => m.channel_post || m.message)
+            .filter(post => post && post.photo)
+            .reverse();
 
-          for (let m of data.result) {
-            let post = m.channel_post || m.message;
-            if (post && post.photo) {
-              let photo = post.photo;
-              let fileId = photo[photo.length - 1].file_id;
+          if (posts.length === 0) {
+            statusEl.innerHTML = "<p>Chưa tìm thấy tài khoản nào có hình ảnh.</p>";
+            return;
+          }
 
-              // Lấy file_path từ Telegram
-              let fileRes = await fetch(`https://api.telegram.org/bot${token}/getFile?file_id=${fileId}`);
-              let fileData = await fileRes.json();
+          // Tải song song thông tin file ảnh để tăng tốc độ
+          const accountPromises = posts.map(async (post, index) => {
+            const photo = post.photo;
+            const fileId = photo[photo.length - 1].file_id;
+            const fileRes = await fetch(`https://api.telegram.org/bot${TOKEN}/getFile?file_id=${fileId}`);
+            const fileData = await fileRes.json();
 
-              if (fileData.ok) {
-                let filePath = fileData.result.file_path;
-                let imgUrl = `https://api.telegram.org/file/bot${token}/${filePath}`;
-                let text = post.caption || "Tài khoản game";
+            if (!fileData.ok) return null;
 
-                htmlContent += `
-                  <div class="product">
-                    <img src="${imgUrl}" onclick="openImg('${imgUrl}')" alt="Ảnh acc game">
-                    <h3>${text}</h3>
-                    <button onclick="buy('${text}')">Mua ngay</button>
-                  </div>
-                `;
-              }
+            const imgUrl = `https://api.telegram.org/file/bot${TOKEN}/${fileData.result.file_path}`;
+            const rawCaption = post.caption || "Tài khoản Game VIP";
+            
+            // Tách tên và giá nếu người đăng dùng dấu "|" (Ví dụ: "Acc Liên Quân VIP | 250.000đ")
+            let title = rawCaption;
+            let price = "Liên hệ";
+            if (rawCaption.includes("|")) {
+              const parts = rawCaption.split("|");
+              title = parts[0].trim();
+              price = parts[1].trim();
             }
-          }
 
-          if (htmlContent === "") {
-            list.innerHTML = "<p style='text-align:center; width:100%'>Không tìm thấy hình ảnh nào trong các bài đăng gần đây.</p>";
-          } else {
-            list.innerHTML = htmlContent;
-          }
+            return {
+              id: post.message_id || (1000 + index),
+              imgUrl,
+              title,
+              price,
+              rawText: rawCaption.toLowerCase()
+            };
+          });
+
+          const results = await Promise.all(accountPromises);
+          allAccounts = results.filter(item => item !== null);
+
+          statusEl.style.display = "none";
+          renderProducts(allAccounts);
 
         } catch (error) {
-          loadingEl.innerText = "Có lỗi xảy ra khi kết nối tới Telegram!";
+          statusEl.innerHTML = "<p>⚠️ Không thể kết nối đến máy chủ Telegram. Vui lòng tải lại trang!</p>";
           console.error(error);
         }
       }
 
-      function buy(accountName) {
-        // Có thể tùy biến nội dung nhắn tin Zalo nếu muốn
-        window.open("https://zalo.me/0869697154", "_blank");
+      function renderProducts(items) {
+        const listEl = document.getElementById("products");
+        if (items.length === 0) {
+          listEl.innerHTML = "<p style='grid-column: 1/-1; text-align:center; color:#94a3b8;'>Không tìm thấy tài khoản phù hợp với từ khóa của bạn.</p>";
+          return;
+        }
+
+        listEl.innerHTML = items.map(acc => `
+          <div class="product">
+            <div class="img-wrapper" onclick="openImg('${acc.imgUrl}')">
+              <img src="${acc.imgUrl}" alt="${acc.title}" loading="lazy" />
+              <span class="zoom-hint">🔍 Phóng to</span>
+            </div>
+            <div class="card-body">
+              <div class="acc-code">MÃ SỐ: #${acc.id}</div>
+              <h3 title="${acc.title}">${acc.title}</h3>
+              <div class="card-footer">
+                <div class="price-tag">${acc.price}</div>
+                <button class="buy-btn" onclick="buy('${acc.id}', '${acc.title.replace(/'/g, "\\'")}')">
+                  MUA NGAY
+                </button>
+              </div>
+            </div>
+          </div>
+        `).join("");
+      }
+
+      function filterProducts() {
+        const keyword = document.getElementById("searchInput").value.toLowerCase().trim();
+        const filtered = allAccounts.filter(acc => 
+          acc.rawText.includes(keyword) || acc.id.toString().includes(keyword)
+        );
+        renderProducts(filtered);
+      }
+
+      function buy(id, title) {
+        // Tự động copy mã acc để khách dán vào Zalo cho tiện
+        const msg = `Chào shop, mình muốn mua Acc mã #${id} (${title})`;
+        if (navigator.clipboard) {
+          navigator.clipboard.writeText(msg).catch(() => {});
+        }
+        alert(`Đã sao chép thông tin Acc #${id}!\nHệ thống sẽ chuyển sang Zalo, bạn chỉ cần Dán (Paste) và gửi tin nhắn cho shop.`);
+        window.open(`https://zalo.me/${ZALO_PHONE}`, "_blank");
       }
 
       function openImg(src) {
@@ -188,6 +481,11 @@
       function closeImg() {
         document.getElementById("popup").style.display = "none";
       }
+
+      // Đóng ảnh khi bấm phím ESC
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") closeImg();
+      });
 
       loadAcc();
     </script>
