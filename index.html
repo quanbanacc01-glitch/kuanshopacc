@@ -33,7 +33,6 @@
         flex-direction: column;
       }
 
-      /* Header / Navbar */
       header {
         background: rgba(21, 28, 44, 0.85);
         backdrop-filter: blur(12px);
@@ -80,7 +79,6 @@
         color: white;
       }
 
-      /* Hero Banner & Search */
       .hero {
         text-align: center;
         padding: 45px 20px 30px;
@@ -123,7 +121,6 @@
         box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
       }
 
-      /* Main Grid */
       main {
         flex: 1;
         max-width: 1280px;
@@ -194,23 +191,11 @@
       }
 
       .acc-code {
-        font-size: 12px;
+        font-size: 13px;
         color: var(--primary);
         font-weight: 700;
         text-transform: uppercase;
-        margin-bottom: 6px;
-      }
-
-      .product h3 {
-        font-size: 16px;
-        font-weight: 600;
-        color: var(--text-main);
-        margin-bottom: 14px;
-        flex: 1;
-        display: -webkit-box;
-        -webkit-line-clamp: 2;
-        -webkit-box-orient: vertical;
-        overflow: hidden;
+        margin-bottom: 8px;
       }
 
       .card-footer {
@@ -218,12 +203,13 @@
         align-items: center;
         justify-content: space-between;
         gap: 10px;
+        margin-top: auto;
         padding-top: 14px;
         border-top: 1px solid var(--card-border);
       }
 
       .price-tag {
-        font-size: 17px;
+        font-size: 18px;
         font-weight: 800;
         color: #fbbf24;
       }
@@ -248,7 +234,6 @@
         transform: scale(0.96);
       }
 
-      /* Loading Spinner */
       .status-box {
         text-align: center;
         padding: 50px 20px;
@@ -269,7 +254,6 @@
         to { transform: rotate(360deg); }
       }
 
-      /* Lightbox Popup */
       .popup {
         display: none;
         position: fixed;
@@ -310,7 +294,6 @@
         background: var(--accent);
       }
 
-      /* Footer */
       footer {
         text-align: center;
         padding: 24px;
@@ -336,7 +319,7 @@
       <h1>KHO TÀI KHOẢN GAME GIÁ RẺ</h1>
       <p>Giao dịch trực tiếp qua Zalo • Uy tín 100% • Bấm vào ảnh để xem chi tiết thông tin tài khoản</p>
       <div class="search-box">
-        <input type="text" id="searchInput" placeholder="🔍 Tìm kiếm tên acc, tướng, skin, mức giá..." onkeyup="filterProducts()" />
+        <input type="text" id="searchInput" placeholder="🔍 Tìm kiếm theo mã số hoặc giá tiền..." onkeyup="filterProducts()" />
       </div>
     </section>
 
@@ -375,7 +358,6 @@
             return;
           }
 
-          // Lọc các bài đăng có ảnh và đảo ngược để bài mới nhất lên đầu
           const posts = data.result
             .map(m => m.channel_post || m.message)
             .filter(post => post && post.photo)
@@ -386,7 +368,6 @@
             return;
           }
 
-          // Tải song song thông tin file ảnh để tăng tốc độ
           const accountPromises = posts.map(async (post, index) => {
             const photo = post.photo;
             const fileId = photo[photo.length - 1].file_id;
@@ -396,21 +377,26 @@
             if (!fileData.ok) return null;
 
             const imgUrl = `https://api.telegram.org/file/bot${TOKEN}/${fileData.result.file_path}`;
-            const rawCaption = post.caption || "Tài khoản Game VIP";
+            const rawCaption = post.caption || "";
             
-            // Tách tên và giá nếu người đăng dùng dấu "|" (Ví dụ: "Acc Liên Quân VIP | 250.000đ")
-            let title = rawCaption;
+            // Xử lý cú pháp rút gọn: #MãAcc | Giá
+            let accCode = "#" + (post.message_id || (1000 + index));
             let price = "Liên hệ";
+
             if (rawCaption.includes("|")) {
-              const parts = rawCaption.split("|");
-              title = parts[0].trim();
-              price = parts[1].trim();
+              const parts = rawCaption.split("|").map(p => p.trim());
+              if (parts.length >= 2) {
+                accCode = parts[0].startsWith("#") ? parts[0] : "#" + parts[0];
+                price = parts[1];
+              }
+            } else if (rawCaption.trim() !== "") {
+              // Trường hợp người dùng chỉ gõ mã hoặc chỉ gõ giá
+              accCode = rawCaption.trim().startsWith("#") ? rawCaption.trim() : "#" + rawCaption.trim();
             }
 
             return {
-              id: post.message_id || (1000 + index),
+              code: accCode,
               imgUrl,
-              title,
               price,
               rawText: rawCaption.toLowerCase()
             };
@@ -431,22 +417,21 @@
       function renderProducts(items) {
         const listEl = document.getElementById("products");
         if (items.length === 0) {
-          listEl.innerHTML = "<p style='grid-column: 1/-1; text-align:center; color:#94a3b8;'>Không tìm thấy tài khoản phù hợp với từ khóa của bạn.</p>";
+          listEl.innerHTML = "<p style='grid-column: 1/-1; text-align:center; color:#94a3b8;'>Không tìm thấy tài khoản phù hợp.</p>";
           return;
         }
 
         listEl.innerHTML = items.map(acc => `
           <div class="product">
             <div class="img-wrapper" onclick="openImg('${acc.imgUrl}')">
-              <img src="${acc.imgUrl}" alt="${acc.title}" loading="lazy" />
+              <img src="${acc.imgUrl}" alt="Tài khoản ${acc.code}" loading="lazy" />
               <span class="zoom-hint">🔍 Phóng to</span>
             </div>
             <div class="card-body">
-              <div class="acc-code">MÃ SỐ: #${acc.id}</div>
-              <h3 title="${acc.title}">${acc.title}</h3>
+              <div class="acc-code">MÃ SỐ: ${acc.code}</div>
               <div class="card-footer">
                 <div class="price-tag">${acc.price}</div>
-                <button class="buy-btn" onclick="buy('${acc.id}', '${acc.title.replace(/'/g, "\\'")}')">
+                <button class="buy-btn" onclick="buy('${acc.code}')">
                   MUA NGAY
                 </button>
               </div>
@@ -458,18 +443,17 @@
       function filterProducts() {
         const keyword = document.getElementById("searchInput").value.toLowerCase().trim();
         const filtered = allAccounts.filter(acc => 
-          acc.rawText.includes(keyword) || acc.id.toString().includes(keyword)
+          acc.rawText.includes(keyword) || acc.code.toLowerCase().includes(keyword)
         );
         renderProducts(filtered);
       }
 
-      function buy(id, title) {
-        // Tự động copy mã acc để khách dán vào Zalo cho tiện
-        const msg = `Chào shop, mình muốn mua Acc mã #${id} (${title})`;
+      function buy(code) {
+        const msg = `Chào shop, mình muốn mua Acc mã ${code}`;
         if (navigator.clipboard) {
           navigator.clipboard.writeText(msg).catch(() => {});
         }
-        alert(`Đã sao chép thông tin Acc #${id}!\nHệ thống sẽ chuyển sang Zalo, bạn chỉ cần Dán (Paste) và gửi tin nhắn cho shop.`);
+        alert(`Đã sao chép mã ${code}!\nHệ thống sẽ chuyển sang Zalo, bạn chỉ cần Dán (Paste) và gửi tin nhắn cho shop.`);
         window.open(`https://zalo.me/${ZALO_PHONE}`, "_blank");
       }
 
@@ -482,7 +466,6 @@
         document.getElementById("popup").style.display = "none";
       }
 
-      // Đóng ảnh khi bấm phím ESC
       document.addEventListener("keydown", (e) => {
         if (e.key === "Escape") closeImg();
       });
