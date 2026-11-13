@@ -344,13 +344,25 @@
       const TOKEN = "8257254524:AAGwFDotvQfd3kxdgrpdTvSqS7gHlK5dBbo";
       const ZALO_PHONE = "0869697154";
       let allAccounts = [];
+      let processedCommands = new Set(); // Tránh gửi lặp tin nhắn thông báo
+
+      async function sendTelegramMessage(chatId, text) {
+        try {
+          await fetch(`https://api.telegram.org/bot${TOKEN}/sendMessage`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ chat_id: chatId, text: text })
+          });
+        } catch (e) {
+          console.error("Lỗi gửi tin nhắn Telegram:", e);
+        }
+      }
 
       async function loadAcc() {
         const statusEl = document.getElementById("status");
         const listEl = document.getElementById("products");
 
         try {
-          // Thêm tham số tránh lưu cache cũ
           const res = await fetch(`https://api.telegram.org/bot${TOKEN}/getUpdates?_t=` + new Date().getTime());
           const data = await res.json();
 
@@ -359,24 +371,54 @@
             return;
           }
 
-          // 1. Quét tất cả các lệnh #xoa từ tin nhắn text trên kênh
+          let deleteAllActive = false;
           let deletedCodes = new Set();
-          data.result.forEach(m => {
+
+          // Duyệt qua lịch sử tin nhắn để tìm lệnh
+          for (let m of data.result) {
             let msg = m.channel_post || m.message;
-            if (msg && msg.text) {
-              let text = msg.text.trim().toLowerCase();
-              if (text.startsWith("#xoa")) {
-                let parts = text.split(/\s+/);
-                if (parts.length > 1) {
-                  let targetCode = parts[1];
-                  if (!targetCode.startsWith("#")) targetCode = "#" + targetCode;
-                  deletedCodes.add(targetCode);
+            if (msg && msg.text && msg.chat) {
+              let text = msg.text.trim();
+              let lowerText = text.toLowerCase();
+              let chatId = msg.chat.id;
+              let updateId = m.update_id;
+
+              // Nếu tin nhắn bắt đầu bằng dấu #
+              if (text.startsWith("#")) {
+                if (!processedCommands.has(updateId)) {
+                  if (lowerText === "#xoatatca") {
+                    deleteAllActive = true;
+                    await sendTelegramMessage(chatId, "✅ Đã xóa thành công toàn bộ danh sách tài khoản trên hệ thống!");
+                    processedCommands.add(updateId);
+                  } else if (lowerText.startsWith("#xoa ")) {
+                    let parts = lowerText.split(/\s+/);
+                    let targetCode = parts[1];
+                    if (targetCode) {
+                      if (!targetCode.startsWith("#")) targetCode = "#" + targetCode;
+                      deletedCodes.add(targetCode);
+                      await sendTelegramMessage(chatId, `✅ Đã xóa thành công tài khoản mã: ${targetCode}`);
+                      processedCommands.add(updateId);
+                    } else {
+                      await sendTelegramMessage(chatId, "❌ Lỗi: Thiếu mã tài khoản cần xóa! Cú pháp đúng: #xoa #MãAcc");
+                      processedCommands.add(updateId);
+                    }
+                  } else {
+                    // Nếu gõ sai lệnh bắt đầu bằng # (ví dụ #xoata, #xoaa...)
+                    await sendTelegramMessage(chatId, `❌ Lỗi cú pháp: Lệnh "${text}" không tồn tại! Các lệnh hợp lệ: #xoatatca hoặc #xoa #MãAcc`);
+                    processedCommands.add(updateId);
+                  }
                 }
               }
             }
-          });
+          }
 
-          // 2. Lọc các bài đăng chứa ảnh hợp lệ
+          if (deleteAllActive) {
+            allAccounts = [];
+            statusEl.style.display = "none";
+            renderProducts([]);
+            return;
+          }
+
           const posts = data.result
             .map(m => m.channel_post || m.message)
             .filter(post => post && post.photo)
@@ -411,7 +453,6 @@
               accCode = rawCaption.trim().startsWith("#") ? rawCaption.trim() : "#" + rawCaption.trim();
             }
 
-            // Nếu mã acc này đã nằm trong danh sách bị lệnh #xoa gọi tên thì bỏ qua không hiển thị
             if (deletedCodes.has(accCode.toLowerCase())) {
               return null;
             }
